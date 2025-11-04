@@ -136,14 +136,19 @@ export default function WineryAdminStepperPage() {
         return false;
       }
       
-      if (!tasting.tasting_price || tasting.tasting_price <= 0) {
-        toast.error(`Tasting #${i + 1}: Tasting price must be greater than 0`);
+      // Allow free tastings (0) and only enforce positive price when needed
+      if (tasting.tasting_price === undefined || tasting.tasting_price === null || tasting.tasting_price < 0) {
+        toast.error(`Tasting #${i + 1}: Tasting price must be 0 or greater`);
         return false;
       }
       
-      if (!tasting.available_times || tasting.available_times.length === 0) {
-        toast.error(`Tasting #${i + 1}: At least one available time must be selected`);
-        return false;
+      // If external booking link is provided, times are not required
+      const hasExternalLink = !!tasting.booking_info?.external_booking_link;
+      if (!hasExternalLink) {
+        if (!tasting.available_times || tasting.available_times.length === 0) {
+          toast.error(`Tasting #${i + 1}: At least one available time must be selected`);
+          return false;
+        }
       }
       
       if (!tasting.wine_types || tasting.wine_types.length === 0) {

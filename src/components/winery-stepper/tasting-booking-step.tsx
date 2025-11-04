@@ -1,4 +1,5 @@
 import { ChangeEvent, useState } from "react";
+import { fileUpload } from "@/lib/fileUpload";
 import { MultiDateTimePicker } from "../datetime-picker";
 import { Winery, TastingInfo, Tours, WineDetail, BookingInfo, FoodPairingOption } from "@/app/interfaces";
 import { MultipleImageUpload } from "../Multi-image-upload";
@@ -192,9 +193,18 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
     });
   };
 
-  const addWine = (index: number) => () => {
+  const addWine = (index: number) => async () => {
     if (newWine.name && newWine.description) {
       const currentWinePhotos = tastingWinePhotos[index] || [];
+      let uploadedUrl: string | undefined = undefined;
+      if (currentWinePhotos[0]) {
+        try {
+          const urls = await fileUpload([currentWinePhotos[0]]);
+          uploadedUrl = urls[0] || undefined;
+        } catch (_) {
+          uploadedUrl = undefined;
+        }
+      }
       setFormData((prev) => {
         const updatedTastings = [...prev.tasting_info];
         updatedTastings[index] = {
@@ -207,7 +217,7 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
               description: newWine.description,
               year: newWine.year ? parseInt(newWine.year.toString()) : undefined,
               tasting_notes: newWine.tasting_notes,
-              photo: currentWinePhotos[0] ? URL.createObjectURL(currentWinePhotos[0]) : undefined,
+              photo: uploadedUrl,
             },
           ],
         };
@@ -265,7 +275,7 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
   };
 
   const addOtherFeature = (index: number) => () => {
-    if (otherFeature.description && newTour.cost >= 0) {
+    if (otherFeature.description && otherFeature.cost >= 0) {
       setFormData((prev) => {
         const updatedTastings = [...prev.tasting_info];
         updatedTastings[index] = {
@@ -694,7 +704,7 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
                     type="number"
                     placeholder="Tour Cost"
                     className="input input-bordered w-full"
-                    value={newTour.cost || ""}
+                    value={newTour.cost}
                     onChange={(e) => setNewTour({ ...newTour, cost: parseFloat(e.target.value) || 0 })}
                     min={0}
                     step="0.01"
@@ -735,7 +745,7 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
                     type="number"
                     placeholder="Price"
                     className="input input-bordered w-full"
-                    value={foodPairingOption.price || ""}
+                    value={foodPairingOption.price}
                     onChange={(e) => setFoodPairingOption({ ...foodPairingOption, price: parseFloat(e.target.value) || 0 })}
                     min={0}
                     step="0.01"
@@ -774,7 +784,7 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
                     type="number"
                     placeholder="Feature Cost"
                     className="input input-bordered w-full"
-                    value={otherFeature.cost || ""}
+                    value={otherFeature.cost}
                     onChange={(e) => setOtherFeature({ ...otherFeature, cost: parseFloat(e.target.value) || 0 })}
                     min={0}
                     step="0.01"

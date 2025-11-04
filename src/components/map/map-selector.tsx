@@ -161,7 +161,10 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ latitude, longitude, o
         const result = nominatimResults[0];
         const lat = parseFloat(result.lat);
         const lon = parseFloat(result.lon);
-        onChange(lat, lon, query.trim());
+        // Prefer provider-formatted address for consistency
+        const formatted = result.display_name as string;
+        setQuery(formatted);
+        onChange(lat, lon, formatted);
         setSuggestions([]);
         return;
       }
@@ -176,6 +179,7 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ latitude, longitude, o
           const geocodeData = await geocodeResponse.json();
           
           if (geocodeData.lat && geocodeData.lon) {
+            setQuery(geocodeData.address);
             onChange(geocodeData.lat, geocodeData.lon, geocodeData.address);
             setSuggestions([]);
             return;
@@ -203,7 +207,6 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ latitude, longitude, o
       }
       
       // If all else fails, keep the address as entered
-      console.log('No match found, but keeping the address as entered');
       onChange(0, 0, query.trim());
       setSuggestions([]);
     } catch (error) {
@@ -241,8 +244,23 @@ export const MapSelector: React.FC<MapSelectorProps> = ({ latitude, longitude, o
   // Allow map clicks to update location
   function LocationMarker() {
     useMapEvents({
-      click(e) {
-        onChange(e.latlng.lat, e.latlng.lng, query);
+      async click(e) {
+        try {
+          // Reverse geocode to get a formatted address
+          const params = new URLSearchParams({
+            format: 'json',
+            lat: e.latlng.lat.toString(),
+            lon: e.latlng.lng.toString(),
+            addressdetails: '1'
+          });
+          const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?${params}`);
+          const data = await resp.json();
+          const formatted = data?.display_name || query;
+          setQuery(formatted);
+          onChange(e.latlng.lat, e.latlng.lng, formatted);
+        } catch (_err) {
+          onChange(e.latlng.lat, e.latlng.lng, query);
+        }
       },
     });
     return latitude && longitude ? <Marker position={[latitude, longitude]} /> : null;

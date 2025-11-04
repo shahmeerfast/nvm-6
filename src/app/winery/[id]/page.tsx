@@ -238,7 +238,7 @@ const WineryDetail = () => {
               <h3 className="font-serif text-xl mb-4">Wine</h3>
               {currentTastingInfo?.wine_details?.map((wine, index) => (
                 <div key={wine.id} className="mb-4">
-                  {wine.photo && (
+                  {wine.photo && /^https?:\/\//.test(wine.photo) && (
                     <div className="mb-4">
                       <img 
                         src={wine.photo} 
@@ -351,6 +351,7 @@ const WineryDetail = () => {
           <h2 className="font-serif text-3xl mb-6 text-wine-primary">Book a Tasting</h2>
           <div className="space-y-6">
             {/* Food Pairing Option Selection */}
+            {!currentTastingInfo?.booking_info?.external_booking_link && (
             <div>
               <label className="text-sm text-gray-900 font-extrabold">Select Food Pairing (Optional)</label>
               <select
@@ -366,8 +367,10 @@ const WineryDetail = () => {
                 ))}
               </select>
             </div>
+            )}
 
             {/* Number of People Selection */}
+            {!currentTastingInfo?.booking_info?.external_booking_link && (
             <div>
               <label className="text-sm text-gray-900 font-extrabold">Number of People</label>
               <input
@@ -389,6 +392,7 @@ const WineryDetail = () => {
                 className="input input-bordered w-full mt-2 text-sm"
               />
             </div>
+            )}
 
             {/* External Booking Link */}
             {currentTastingInfo?.booking_info?.external_booking_link && (
@@ -403,11 +407,13 @@ const WineryDetail = () => {
             )}
 
             {/* Booking Calendar */}
-            <BookingCalendar
-              slots={currentTastingInfo?.booking_info?.available_slots}
-              maxGuests={currentTastingInfo?.booking_info?.max_guests_per_slot}
-              weekendMultiplier={currentTastingInfo?.booking_info?.dynamic_pricing?.weekend_multiplier}
-            />
+            {!currentTastingInfo?.booking_info?.external_booking_link && (
+              <BookingCalendar
+                slots={currentTastingInfo?.booking_info?.available_slots}
+                maxGuests={currentTastingInfo?.booking_info?.max_guests_per_slot}
+                weekendMultiplier={currentTastingInfo?.booking_info?.dynamic_pricing?.weekend_multiplier}
+              />
+            )}
           </div>
         </div>
 

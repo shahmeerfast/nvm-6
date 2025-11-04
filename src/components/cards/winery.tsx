@@ -134,6 +134,8 @@ export default function WineryBookingCard({ winery, onUpdate, onRemove }: Winery
     setSelections((prev) => ({ ...prev, foodPairings: [], tours: [], otherFeature: [] }));
   }, [currentTastingInfo]);
 
+  const hasExternal = !!currentTastingInfo?.booking_info?.external_booking_link || winery?.payment_method?.type === 'external_booking';
+
   return (
     <div className="card shadow-sm bg-white rounded-xl p-4 md:p-6 flex flex-col md:flex-row gap-4 items-start w-full">
       <div className="flex-grow bg-white w-full">
@@ -183,6 +185,19 @@ export default function WineryBookingCard({ winery, onUpdate, onRemove }: Winery
         </div>
 
         <div className="mt-4 flex flex-wrap md:flex-nowrap gap-4">
+          {hasExternal ? (
+            <div className="w-full">
+              <a
+                href={currentTastingInfo?.booking_info?.external_booking_link || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn bg-wine-primary text-white w-full"
+              >
+                Book via External Site
+              </a>
+            </div>
+          ) : (
+            <>
           <div className="w-full md:w-1/3">
             <label className="block text-xs font-medium text-gray-600">Date</label>
             <input
@@ -277,6 +292,8 @@ export default function WineryBookingCard({ winery, onUpdate, onRemove }: Winery
             </select>
           </div>
            )}
+            </>
+          )}
 
         </div>
       </div>
