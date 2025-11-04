@@ -57,7 +57,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "Forbidden: You do not have permission to update this winery." }, { status: 403 });
     }
     const data = await request.json();
-    const updatedWinery = await Winery.findByIdAndUpdate(id, data, { new: true });
+    // Use $set to avoid unintended replacement and enable validators
+    const updatedWinery = await Winery.findByIdAndUpdate(
+      id,
+      { $set: data },
+      { new: true, runValidators: true }
+    );
     return NextResponse.json({ message: "Winery updated successfully", updatedWinery });
   } catch (error) {
     console.error("Error updating winery:", error);

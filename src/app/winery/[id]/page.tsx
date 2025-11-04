@@ -105,6 +105,24 @@ const WineryDetail = () => {
     };
   }, [id]);
 
+  // Persist Number of People selection across refreshes per winery/tasting
+  useEffect(() => {
+    try {
+      const storageKey = `winery:${id}:people:${selectedTastingIndex}`;
+      const saved = localStorage.getItem(storageKey);
+      if (saved !== null && saved !== undefined) {
+        const parsed = parseInt(saved);
+        if (!isNaN(parsed)) {
+          setSelectedNumberOfPeople(parsed);
+        }
+      } else {
+        // Default to 1 when nothing saved (or 0 if max is 0)
+        setSelectedNumberOfPeople(1);
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, selectedTastingIndex]);
+
   if (!winery) {
     return <div>Loading...</div>;
   }
@@ -375,7 +393,7 @@ const WineryDetail = () => {
               <label className="text-sm text-gray-900 font-extrabold">Number of People</label>
               <input
                 type="number"
-                min={1}
+                min={0}
                 max={currentTastingInfo?.booking_info?.max_guests_per_slot || 20}
                 value={selectedNumberOfPeople}
                 onChange={(e) => {
@@ -384,8 +402,12 @@ const WineryDetail = () => {
                     setSelectedNumberOfPeople('');
                   } else {
                     const numValue = parseInt(value);
-                    if (!isNaN(numValue) && numValue >= 1) {
+                    if (!isNaN(numValue) && numValue >= 0) {
                       setSelectedNumberOfPeople(numValue);
+                      try {
+                        const storageKey = `winery:${id}:people:${selectedTastingIndex}`;
+                        localStorage.setItem(storageKey, String(numValue));
+                      } catch {}
                     }
                   }
                 }}
