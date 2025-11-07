@@ -30,7 +30,7 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
 }) => {
   const [foodPairingOption, setFoodPairingOption] = useState<FoodPairingOption>({ id: "", name: "", price: 0 });
   const [newWine, setNewWine] = useState<WineDetail>({ id: "", name: "", description: "", year: undefined, tasting_notes: "", photo: "" });
-  const [newTour, setNewTour] = useState<{ description: string; cost: number }>({ description: "", cost: 0 });
+  const [newTour, setNewTour] = useState<{ description: string; cost?: number }>({ description: "", cost: undefined });
   const [otherFeature, setOtherFeature] = useState<{ description: string; cost: number }>({ description: "", cost: 0 });
   const [tastingWinePhotos, setTastingWinePhotos] = useState<{ [key: number]: File[] }>({});
   
@@ -243,7 +243,7 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
   };
 
   const submitTour = (index: number) => () => {
-    if (newTour.description && newTour.cost >= 0) {
+    if (newTour.description && newTour.cost !== undefined && newTour.cost >= 0) {
       setFormData((prev) => {
         const updatedTastings = [...prev.tasting_info];
         updatedTastings[index] = {
@@ -256,7 +256,7 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
         };
         return { ...prev, tasting_info: updatedTastings };
       });
-      setNewTour({ description: "", cost: 0 });
+      setNewTour({ description: "", cost: undefined });
     }
   };
 
@@ -704,8 +704,15 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
                     type="number"
                     placeholder="Tour Cost"
                     className="input input-bordered w-full"
-                    value={newTour.cost}
-                    onChange={(e) => setNewTour({ ...newTour, cost: parseFloat(e.target.value) || 0 })}
+                    value={newTour.cost ?? ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const parsedValue = parseFloat(value);
+                      setNewTour({
+                        ...newTour,
+                        cost: value === "" || Number.isNaN(parsedValue) ? undefined : parsedValue,
+                      });
+                    }}
                     min={0}
                     step="0.01"
                   />
