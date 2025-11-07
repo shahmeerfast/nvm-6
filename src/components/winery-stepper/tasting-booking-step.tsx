@@ -243,7 +243,8 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
   };
 
   const submitTour = (index: number) => () => {
-    if (newTour.description && newTour.cost !== undefined && newTour.cost >= 0) {
+    const { description, cost } = newTour;
+    if (description && cost !== undefined && cost >= 0) {
       setFormData((prev) => {
         const updatedTastings = [...prev.tasting_info];
         updatedTastings[index] = {
@@ -251,7 +252,7 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
           tours: {
             ...updatedTastings[index].tours,
             available: true,
-            tour_options: [...(updatedTastings[index].tours.tour_options || []), { description: newTour.description, cost: newTour.cost }],
+            tour_options: [...(updatedTastings[index].tours.tour_options || []), { description, cost }],
           },
         };
         return { ...prev, tasting_info: updatedTastings };
