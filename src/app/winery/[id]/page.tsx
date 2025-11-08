@@ -30,6 +30,7 @@ const WineryDetail = () => {
   const [selectedTastingIndex, setSelectedTastingIndex] = useState<number>(0);
   const [selectedFoodPairingOption, setSelectedFoodPairingOption] = useState<string | null>(null);
   const [selectedNumberOfPeople, setSelectedNumberOfPeople] = useState<number | string>(1);
+  const [selectedSlot, setSelectedSlot] = useState<string>("");
   const { id } = useParams() as { id: string };
   const { itinerary, setItinerary } = useItinerary();
   const [winery, setWinery] = useState<Winery>(undefined as any);
@@ -47,6 +48,61 @@ const WineryDetail = () => {
       toast.success(`${winery?.name} added to your itinerary!`);
     } else {
       toast.error("Winery already in itinerary!");
+    }
+  };
+
+  const handleSlotSelect = (slot: string) => {
+    if (currentTastingInfo?.booking_info?.max_guests_per_slot === 0) {
+      toast.error("This winery is not accepting bookings at this time.");
+      return;
+    }
+
+    if (!selectedNumberOfPeople || Number(selectedNumberOfPeople) === 0) {
+      toast.error("Please select the number of people before choosing a date.");
+      return;
+    }
+
+    setSelectedSlot(slot);
+    
+    // Check if winery is already in itinerary
+    const isInItinerary = itinerary.some((w) => (w._id || w.name) === (winery._id || winery.name));
+    
+    if (!isInItinerary) {
+      // Add winery to itinerary with booking details
+      const wineryWithBooking = {
+        ...winery,
+        bookingDetails: {
+          selectedDate: new Date(slot).toISOString().split("T")[0],
+          selectedTime: slot,
+          selectedTastingIndex,
+          tasting: true,
+          foodPairings: selectedFoodPairingOption 
+            ? currentTastingInfo?.food_pairing_options?.filter(fp => fp.name === selectedFoodPairingOption).map(fp => ({ name: fp.name, price: fp.price })) || []
+            : [],
+          tours: [],
+          otherFeature: [],
+        },
+      };
+      setItinerary([...itinerary, wineryWithBooking]);
+      toast.success(`${winery?.name} added to your itinerary with selected date!`);
+    } else {
+      // Update existing winery in itinerary with new slot
+      const updatedItinerary = itinerary.map((w) => {
+        if ((w._id || w.name) === (winery._id || winery.name)) {
+          return {
+            ...w,
+            bookingDetails: {
+              ...w.bookingDetails,
+              selectedDate: new Date(slot).toISOString().split("T")[0],
+              selectedTime: slot,
+              selectedTastingIndex,
+            },
+          };
+        }
+        return w;
+      });
+      setItinerary(updatedItinerary);
+      toast.success("Booking date updated!");
     }
   };
 
@@ -122,6 +178,16 @@ const WineryDetail = () => {
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, selectedTastingIndex]);
+
+  // Sync selectedSlot with itinerary if winery is already in itinerary
+  useEffect(() => {
+    if (winery) {
+      const wineryInItinerary = itinerary.find((w) => (w._id || w.name) === (winery._id || winery.name));
+      if (wineryInItinerary?.bookingDetails?.selectedTime) {
+        setSelectedSlot(wineryInItinerary.bookingDetails.selectedTime);
+      }
+    }
+  }, [itinerary, winery]);
 
   if (!winery) {
     return <div>Loading...</div>;
@@ -434,6 +500,8 @@ const WineryDetail = () => {
                 slots={currentTastingInfo?.booking_info?.available_slots}
                 maxGuests={currentTastingInfo?.booking_info?.max_guests_per_slot}
                 weekendMultiplier={currentTastingInfo?.booking_info?.dynamic_pricing?.weekend_multiplier}
+                onSlotSelect={handleSlotSelect}
+                selectedSlot={selectedSlot}
               />
             )}
           </div>
