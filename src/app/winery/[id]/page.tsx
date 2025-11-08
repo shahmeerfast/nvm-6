@@ -89,13 +89,26 @@ const WineryDetail = () => {
       // Update existing winery in itinerary with new slot
       const updatedItinerary = itinerary.map((w) => {
         if ((w._id || w.name) === (winery._id || winery.name)) {
+          const existingBookingDetails = w.bookingDetails || {
+            selectedDate: "",
+            selectedTime: "",
+            selectedTastingIndex: 0,
+            tasting: true,
+            foodPairings: [],
+            tours: [],
+            otherFeature: [],
+          };
+          
           return {
             ...w,
             bookingDetails: {
-              ...w.bookingDetails,
               selectedDate: new Date(slot).toISOString().split("T")[0],
               selectedTime: slot,
               selectedTastingIndex,
+              tasting: existingBookingDetails.tasting ?? true,
+              foodPairings: existingBookingDetails.foodPairings || [],
+              tours: existingBookingDetails.tours || [],
+              otherFeature: existingBookingDetails.otherFeature || [],
             },
           };
         }
