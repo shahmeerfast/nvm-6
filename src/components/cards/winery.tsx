@@ -134,7 +134,9 @@ export default function WineryBookingCard({ winery, onUpdate, onRemove }: Winery
     setSelections((prev) => ({ ...prev, foodPairings: [], tours: [], otherFeature: [] }));
   }, [currentTastingInfo]);
 
-  const hasExternal = !!currentTastingInfo?.booking_info?.external_booking_link || winery?.payment_method?.type === 'external_booking';
+  const hasExternal = !!currentTastingInfo?.booking_info?.external_booking_link || 
+                     winery?.payment_method?.type === 'external_booking' ||
+                     !!winery?.payment_method?.external_booking_link;
 
   return (
     <div className="card shadow-sm bg-white rounded-xl p-4 md:p-6 flex flex-col md:flex-row gap-4 items-start w-full">
@@ -187,14 +189,33 @@ export default function WineryBookingCard({ winery, onUpdate, onRemove }: Winery
         <div className="mt-4 flex flex-wrap md:flex-nowrap gap-4">
           {hasExternal ? (
             <div className="w-full">
-              <a
-                href={currentTastingInfo?.booking_info?.external_booking_link || '#'}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  const externalLink = currentTastingInfo?.booking_info?.external_booking_link || 
+                                     winery?.payment_method?.external_booking_link;
+                  if (externalLink && externalLink !== '#' && externalLink.trim() !== '') {
+                    // Validate that it's a valid URL
+                    try {
+                      const url = new URL(externalLink);
+                      window.open(url.toString(), '_blank', 'noopener,noreferrer');
+                    } catch {
+                      // If it's not a valid absolute URL, try to construct one
+                      if (externalLink.startsWith('/')) {
+                        alert('Invalid external booking link. Please contact the winery for booking information.');
+                      } else {
+                        // Try to open it anyway (might be a valid URL without protocol)
+                        window.open(externalLink.startsWith('http') ? externalLink : `https://${externalLink}`, '_blank', 'noopener,noreferrer');
+                      }
+                    }
+                  } else {
+                    alert('External booking link is not available for this winery.');
+                  }
+                }}
                 className="btn bg-wine-primary text-white w-full"
               >
                 Book via External Site
-              </a>
+              </button>
             </div>
           ) : (
             <>

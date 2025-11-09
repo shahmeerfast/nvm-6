@@ -200,20 +200,53 @@ const handleConfirmBooking = async () => {
       }
     } else {
       // Check if any wineries use external booking links
-      const hasExternalBooking = itinerary.some((winery) => winery?.payment_method?.type === "external_booking");
+      // Check both payment_method level and tasting booking_info level
+      const hasExternalBooking = itinerary.some((winery) => {
+        const selectedTastingIndex = winery.bookingDetails?.selectedTastingIndex || 0;
+        const currentTastingInfo = winery.tasting_info?.[selectedTastingIndex];
+        return winery?.payment_method?.type === "external_booking" || 
+               !!currentTastingInfo?.booking_info?.external_booking_link;
+      });
       
       if (hasExternalBooking) {
         // Handle external booking links
-        const externalBookings = itinerary.filter((winery) => winery?.payment_method?.type === "external_booking");
+        // Find the first winery with an external booking link
+        const firstExternalBooking = itinerary.find((winery) => {
+          const selectedTastingIndex = winery.bookingDetails?.selectedTastingIndex || 0;
+          const currentTastingInfo = winery.tasting_info?.[selectedTastingIndex];
+          return winery?.payment_method?.type === "external_booking" || 
+                 !!currentTastingInfo?.booking_info?.external_booking_link;
+        });
         
-        if (externalBookings.length > 0) {
-          // For external bookings, redirect to the winery's booking link
-          const firstExternalBooking = externalBookings[0];
-          if (firstExternalBooking.payment_method?.external_booking_link) {
+        if (firstExternalBooking) {
+          const selectedTastingIndex = firstExternalBooking.bookingDetails?.selectedTastingIndex || 0;
+          const currentTastingInfo = firstExternalBooking.tasting_info?.[selectedTastingIndex];
+          
+          // Get external link from either payment_method or booking_info
+          const externalLink = firstExternalBooking.payment_method?.external_booking_link || 
+                               currentTastingInfo?.booking_info?.external_booking_link;
+          
+          if (externalLink && externalLink !== '#' && externalLink.trim() !== '') {
+            // Validate and format the URL
+            let validUrl: string;
+            try {
+              const url = new URL(externalLink);
+              validUrl = url.toString();
+            } catch {
+              // If it's not a valid absolute URL, try to construct one
+              if (externalLink.startsWith('/')) {
+                toast.error('Invalid external booking link. Please contact the winery for booking information.');
+                return;
+              } else {
+                // Try to add protocol if missing
+                validUrl = externalLink.startsWith('http') ? externalLink : `https://${externalLink}`;
+              }
+            }
+            
             // Still send confirmation to our system (no payment processing)
             await axios.post("/api/itinerary/book", { data });
             toast.success("Booking confirmed! Redirecting to winery booking page...");
-            window.open(firstExternalBooking.payment_method.external_booking_link, '_blank');
+            window.open(validUrl, '_blank', 'noopener,noreferrer');
             return;
           }
         }

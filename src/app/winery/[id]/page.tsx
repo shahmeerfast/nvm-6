@@ -467,7 +467,7 @@ const WineryDetail = () => {
             )}
 
             {/* Number of People Selection */}
-            {!currentTastingInfo?.booking_info?.external_booking_link && (
+            {!(currentTastingInfo?.booking_info?.external_booking_link || winery?.payment_method?.external_booking_link) && (
             <div>
               <label className="text-sm text-gray-900 font-extrabold">Number of People</label>
               <input
@@ -496,11 +496,23 @@ const WineryDetail = () => {
             )}
 
             {/* External Booking Link */}
-            {currentTastingInfo?.booking_info?.external_booking_link && (
+            {(currentTastingInfo?.booking_info?.external_booking_link || winery?.payment_method?.external_booking_link) && (
               <div>
                 <Button
                   className="bg-wine-primary hover:bg-wine-primary/90 text-white w-full py-6 text-lg"
-                  onClick={() => window.open(currentTastingInfo.booking_info.external_booking_link, "_blank")}
+                  onClick={() => {
+                    const externalLink = currentTastingInfo?.booking_info?.external_booking_link || 
+                                       winery?.payment_method?.external_booking_link;
+                    if (externalLink && externalLink !== '#' && externalLink.trim() !== '') {
+                      try {
+                        const url = new URL(externalLink);
+                        window.open(url.toString(), "_blank", "noopener,noreferrer");
+                      } catch {
+                        const validUrl = externalLink.startsWith('http') ? externalLink : `https://${externalLink}`;
+                        window.open(validUrl, "_blank", "noopener,noreferrer");
+                      }
+                    }
+                  }}
                 >
                   Book via External Site
                 </Button>
@@ -508,7 +520,7 @@ const WineryDetail = () => {
             )}
 
             {/* Booking Calendar */}
-            {!currentTastingInfo?.booking_info?.external_booking_link && (
+            {!(currentTastingInfo?.booking_info?.external_booking_link || winery?.payment_method?.external_booking_link) && (
               <BookingCalendar
                 slots={currentTastingInfo?.booking_info?.available_slots}
                 maxGuests={currentTastingInfo?.booking_info?.max_guests_per_slot}

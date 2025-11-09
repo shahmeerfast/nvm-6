@@ -29,9 +29,11 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
   setTastingImages,
 }) => {
   const [foodPairingOption, setFoodPairingOption] = useState<FoodPairingOption>({ id: "", name: "", price: 0 });
+  const [foodPriceInput, setFoodPriceInput] = useState<string>("");
   const [newWine, setNewWine] = useState<WineDetail>({ id: "", name: "", description: "", year: undefined, tasting_notes: "", photo: "" });
   const [newTour, setNewTour] = useState<{ description: string; cost?: number }>({ description: "", cost: undefined });
-  const [otherFeature, setOtherFeature] = useState<{ description: string; cost: number }>({ description: "", cost: 0 });
+  const [otherFeature, setOtherFeature] = useState<{ description: string; cost?: number }>({ description: "", cost: undefined });
+  const [otherFeatureCostInput, setOtherFeatureCostInput] = useState<string>("");
   const [tastingWinePhotos, setTastingWinePhotos] = useState<{ [key: number]: File[] }>({});
   
   // Local state for input values to allow empty inputs
@@ -179,6 +181,7 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
         return { ...prev, tasting_info: updatedTastings };
       });
       setFoodPairingOption({ id: "", name: "", price: 0 });
+      setFoodPriceInput("");
     }
   };
 
@@ -276,7 +279,7 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
   };
 
   const addOtherFeature = (index: number) => () => {
-    if (otherFeature.description && otherFeature.cost >= 0) {
+    if (otherFeature.description && otherFeature.cost !== undefined && otherFeature.cost >= 0) {
       setFormData((prev) => {
         const updatedTastings = [...prev.tasting_info];
         updatedTastings[index] = {
@@ -288,7 +291,8 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
         };
         return { ...prev, tasting_info: updatedTastings };
       });
-      setOtherFeature({ description: "", cost: 0 });
+      setOtherFeature({ description: "", cost: undefined });
+      setOtherFeatureCostInput("");
     }
   };
 
@@ -753,8 +757,17 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
                     type="number"
                     placeholder="Price"
                     className="input input-bordered w-full"
-                    value={foodPairingOption.price}
-                    onChange={(e) => setFoodPairingOption({ ...foodPairingOption, price: parseFloat(e.target.value) || 0 })}
+                    value={foodPriceInput}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFoodPriceInput(value);
+                      const parsedValue = parseFloat(value);
+                      if (value === "" || Number.isNaN(parsedValue)) {
+                        setFoodPairingOption({ ...foodPairingOption, price: 0 });
+                      } else {
+                        setFoodPairingOption({ ...foodPairingOption, price: parsedValue });
+                      }
+                    }}
                     min={0}
                     step="0.01"
                   />
@@ -792,8 +805,17 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
                     type="number"
                     placeholder="Feature Cost"
                     className="input input-bordered w-full"
-                    value={otherFeature.cost}
-                    onChange={(e) => setOtherFeature({ ...otherFeature, cost: parseFloat(e.target.value) || 0 })}
+                    value={otherFeatureCostInput}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setOtherFeatureCostInput(value);
+                      const parsedValue = parseFloat(value);
+                      if (value === "" || Number.isNaN(parsedValue)) {
+                        setOtherFeature({ ...otherFeature, cost: undefined });
+                      } else {
+                        setOtherFeature({ ...otherFeature, cost: parsedValue });
+                      }
+                    }}
                     min={0}
                     step="0.01"
                   />
