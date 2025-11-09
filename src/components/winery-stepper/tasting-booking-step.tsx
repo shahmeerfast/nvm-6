@@ -280,13 +280,15 @@ export const TastingBookingForm: React.FC<TastingBookingFormProps> = ({
 
   const addOtherFeature = (index: number) => () => {
     if (otherFeature.description && otherFeature.cost !== undefined && otherFeature.cost >= 0) {
+      // Ensure cost is a number (TypeScript type narrowing)
+      const featureCost: number = otherFeature.cost;
       setFormData((prev) => {
         const updatedTastings = [...prev.tasting_info];
         updatedTastings[index] = {
           ...updatedTastings[index],
           other_features: [
             ...(updatedTastings[index].other_features || []),
-            { description: otherFeature.description, cost: otherFeature.cost },
+            { description: otherFeature.description, cost: featureCost },
           ],
         };
         return { ...prev, tasting_info: updatedTastings };
