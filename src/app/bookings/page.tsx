@@ -59,15 +59,45 @@ export default function MyBookingsPage() {
       alert("Dropoff location not available for this booking.");
       return;
     }
+    
     const dropoffLatitude = earliestWinery.winery.location.latitude;
     const dropoffLongitude = earliestWinery.winery.location.longitude;
-    // Set pickup time 30 minutes from now (in seconds)
-    const pickupTime = Math.floor(Date.now() / 1000) + 30 * 60;
-    let rideURL = "";
-    if (service === "uber") {
-      rideURL = `https://m.uber.com/ul/?action=setPickup&pickup[latitude]=${location.latitude}&pickup[longitude]=${location.longitude}&dropoff[latitude]=${dropoffLatitude}&dropoff[longitude]=${dropoffLongitude}&pickup_time=${pickupTime}&intent=ride`;
+    
+    // Validate location coordinates
+    if (!location.latitude || !location.longitude || isNaN(location.latitude) || isNaN(location.longitude)) {
+      alert("Invalid location coordinates. Please enable location access.");
+      return;
     }
-    window.open(rideURL, "_blank");
+
+    if (!dropoffLatitude || !dropoffLongitude || isNaN(dropoffLatitude) || isNaN(dropoffLongitude)) {
+      alert("Invalid winery location. Unable to book ride.");
+      return;
+    }
+    
+    let rideURL = "";
+    try {
+      if (service === "uber") {
+        // Construct Uber URL - coordinates don't need encoding
+        rideURL = `https://m.uber.com/ul/?action=setPickup&pickup[latitude]=${location.latitude}&pickup[longitude]=${location.longitude}&dropoff[latitude]=${dropoffLatitude}&dropoff[longitude]=${dropoffLongitude}`;
+      }
+      
+      if (rideURL) {
+        console.log("Opening ride URL:", rideURL);
+        // Create an anchor element and click it - this avoids popup blockers
+        const link = document.createElement("a");
+        link.href = rideURL;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        alert("Failed to generate ride URL. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error constructing ride URL:", error);
+      alert("Failed to open ride booking. Please try again.");
+    }
   };
 
   // Handler passed to BookingCard to trigger ride booking

@@ -297,18 +297,59 @@ const handleConfirmBooking = async () => {
 
   const openRideLink = (service: "uber" | "lyft", location: { latitude: number; longitude: number }) => {
     const earliestWinery = itinerary[0];
-    if (!earliestWinery) return;
-
-    const pickupTime = Math.floor(Date.now() / 1000) + 30 * 60;
-    let rideURL = "";
-    if (service === "uber") {
-      rideURL = `https://m.uber.com/ul/?action=setPickup&pickup[latitude]=${location.latitude}&pickup[longitude]=${location.longitude}&dropoff[latitude]=${earliestWinery.location.latitude}&dropoff[longitude]=${earliestWinery.location.longitude}&pickup_time=${pickupTime}&intent=ride`;
-    } else if (service === "lyft") {
-      rideURL = `https://ride.lyft.com/?id=lyft&pickup[latitude]=${location.latitude}&pickup[longitude]=${
-        location.longitude
-      }&destination=${encodeURIComponent(earliestWinery.location.address)}`;
+    if (!earliestWinery || !earliestWinery.location) {
+      toast.error("Winery location not available. Unable to book ride.");
+      return;
     }
-    window.open(rideURL, "_blank");
+
+    // Validate location coordinates
+    if (!location.latitude || !location.longitude || isNaN(location.latitude) || isNaN(location.longitude)) {
+      toast.error("Invalid location coordinates. Please enable location access.");
+      return;
+    }
+
+    if (!earliestWinery.location.latitude || !earliestWinery.location.longitude || 
+        isNaN(earliestWinery.location.latitude) || isNaN(earliestWinery.location.longitude)) {
+      toast.error("Invalid winery location. Unable to book ride.");
+      return;
+    }
+
+    let rideURL = "";
+    try {
+      if (service === "uber") {
+        // Construct Uber URL - coordinates don't need encoding, just ensure they're numbers
+        const pickupLat = location.latitude;
+        const pickupLng = location.longitude;
+        const dropoffLat = earliestWinery.location.latitude;
+        const dropoffLng = earliestWinery.location.longitude;
+        
+        // Use literal square brackets as Uber expects them in parameter names
+        rideURL = `https://m.uber.com/ul/?action=setPickup&pickup[latitude]=${pickupLat}&pickup[longitude]=${pickupLng}&dropoff[latitude]=${dropoffLat}&dropoff[longitude]=${dropoffLng}`;
+      } else if (service === "lyft") {
+        const pickupLat = location.latitude;
+        const pickupLng = location.longitude;
+        const destination = earliestWinery.location.address ? encodeURIComponent(earliestWinery.location.address) : "";
+        
+        rideURL = `https://ride.lyft.com/?id=lyft&pickup[latitude]=${pickupLat}&pickup[longitude]=${pickupLng}${destination ? `&destination=${destination}` : ""}`;
+      }
+      
+      if (rideURL) {
+        console.log("Opening ride URL:", rideURL);
+        // Create an anchor element and click it - this avoids popup blockers
+        const link = document.createElement("a");
+        link.href = rideURL;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        toast.error("Failed to generate ride URL. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error constructing ride URL:", error);
+      toast.error("Failed to open ride booking. Please try again.");
+    }
   };
 
   // Sort itinerary without causing infinite loop
