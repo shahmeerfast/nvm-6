@@ -357,15 +357,19 @@ const WineryDetail = () => {
             {/* Tour Options Section */}
             {currentTastingInfo?.tours?.tour_options && currentTastingInfo.tours.tour_options.length > 0 && (
               <div>
-                <h3 className="font-serif text-xl mb-4">Tour Options</h3>
+                <h3 className="font-serif text-xl mb-4">
+                  {currentTastingInfo.tours.tour_options.length === 1 ? "Tour Option" : "Tour Options"}
+                </h3>
                 {currentTastingInfo.tours.tour_options.map((tour, index) => (
                   <div key={index + 1} className="mb-4">
                     <p>
                       <strong>Tour Option:</strong> {tour.description}
                     </p>
-                    <p>
-                      <strong>Tour Cost:</strong> ${tour.cost}
-                    </p>
+                    {tour.cost > 0 && (
+                      <p>
+                        <strong>Tour Cost:</strong> ${tour.cost}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
