@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { FaFacebook, FaGoogle, FaInstagram, FaLinkedin, FaTiktok, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaInstagram, FaTiktok, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuthStore } from "@/store/authStore";
 import { SessionStorageService } from "@/lib/localstorage.config";
 
@@ -55,20 +55,8 @@ const AuthModal = ({ setShowPopup, showLoginForm = false }: ModalProps) => {
         </p>
 
         <div className="flex flex-wrap gap-3 justify-center md:mb-8 mb-4">
-          <button className="btn btn-outline flex items-center gap-3 px-3 py-2 rounded-xl border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:border-blue-700 hover:text-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500 transition-all transform active:scale-95">
-            <FaFacebook size={22} />
-          </button>
-
-          <button className="btn btn-outline flex items-center gap-3 px-3 py-2 rounded-xl border-2 border-[#4285F4] text-[#4285F4] hover:border-[#4285F4] hover:bg-[#4285F4] hover:text-white focus:outline-none focus:border-[#4285F4] focus:ring-2 focus:ring-[#4285F4] transition-all transform active:scale-95">
-            <FaGoogle size={22} />
-          </button>
-
           <button className="btn btn-outline flex items-center gap-3 px-3 py-2 rounded-xl border-2 border-[#E4405F] text-[#E4405F] hover:border-[#E4405F] hover:bg-[#E4405F] hover:text-white focus:outline-none focus:border-[#E4405F] focus:ring-2 focus:ring-[#E4405F] transition-all transform active:scale-95">
             <FaInstagram size={22} />
-          </button>
-
-          <button className="btn btn-outline flex items-center gap-3 px-3 py-2 rounded-xl border-2 border-[#0077B5] text-[#0077B5] hover:border-[#0077B5] hover:bg-[#0077B5] hover:text-white focus:outline-none focus:border-[#0077B5] focus:ring-2 focus:ring-[#0077B5] transition-all transform active:scale-95">
-            <FaLinkedin size={22} />
           </button>
 
           <button className="btn btn-outline flex items-center gap-3 px-3 py-2 rounded-xl border-2 border-black text-black hover:border-black hover:bg-black hover:text-white focus:outline-none focus:border-black focus:ring-2 focus:ring-gray-500 transition-all transform active:scale-95">
