@@ -246,6 +246,8 @@ const Filter = ({ wineries, onFilterApply }: FilterProps) => {
           handleSpecialFeatureChange={handleSpecialFeatureChange}
           isFeaturesOpen={isFeaturesOpen}
           setIsFeaturesOpen={setIsFeaturesOpen}
+          onSearch={applyFilters}
+          isSearching={isLoading}
         />
       </BottomSheet>
       <div className="hidden md:block p-4 bg-white shadow-lg rounded-lg w-full max-w-sm sm:max-w-md space-y-4 md:space-y-6">
@@ -256,6 +258,8 @@ const Filter = ({ wineries, onFilterApply }: FilterProps) => {
           handleSpecialFeatureChange={handleSpecialFeatureChange}
           isFeaturesOpen={isFeaturesOpen}
           setIsFeaturesOpen={setIsFeaturesOpen}
+          onSearch={applyFilters}
+          isSearching={isLoading}
         />
 
         {/* Tasting Price Range Filter */}

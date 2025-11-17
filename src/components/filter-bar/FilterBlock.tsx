@@ -27,6 +27,8 @@ interface FilterBlockProps {
   handleSpecialFeatureChange: (feature: string, checked: boolean) => void;
   isFeaturesOpen: boolean;
   setIsFeaturesOpen: (value: boolean) => void;
+  onSearch?: () => void;
+  isSearching?: boolean;
 }
 
 export const FilterBlock = ({
@@ -35,6 +37,8 @@ export const FilterBlock = ({
   handleSpecialFeatureChange,
   isFeaturesOpen,
   setIsFeaturesOpen,
+  onSearch,
+  isSearching,
 }: FilterBlockProps) => {
   return (
     <>
@@ -216,6 +220,17 @@ export const FilterBlock = ({
           </div>
         )}
       </div>
+
+      {onSearch && (
+        <button
+          type="button"
+          className="w-full flex items-center justify-center px-4 py-2 rounded-md bg-wine-primary text-white hover:bg-wine-primary/90 hover:shadow-neumorphism transition duration-300 ease-in-out text-sm font-medium"
+          onClick={onSearch}
+          disabled={isSearching}
+        >
+          {isSearching ? "Searching..." : "Search"}
+        </button>
+      )}
     </>
   );
 };
