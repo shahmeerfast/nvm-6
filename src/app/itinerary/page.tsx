@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import ItinerarySummary from "@/components/Itinerary-summary";
 import { useItinerary, BookingData, ItineraryWinery } from "@/store/itinerary";
 import AuthModal from "@/components/modal/AuthModal";
 import { Car, Loader2, Wine } from "lucide-react";
@@ -391,8 +390,6 @@ const handleConfirmBooking = async () => {
             </div>
 
             <div className="lg:w-2/5 w-full">
-              <ItinerarySummary wineries={itinerary} onConfirm={handleConfirmBooking} />
-
               <div className="flex gap-4 mt-6">
                 <Button variant="destructive" onClick={handleClearAll}>
                   Clear All
